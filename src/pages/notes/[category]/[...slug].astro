@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// Static generation for all notes
+export async function getStaticPaths() {
+  const notes = await getCollection("notes");
+
+  return notes.map((entry) => {
+    const parts = entry.id.split("/");              // e.g. ["ml", "probabilistic-view.mdx"]
+    const category = entry.data.category;
+
+    const restRaw = parts.slice(1).join("/");       // "probabilistic-view.mdx" or "series/x.mdx"
+    const rest = restRaw.replace(/\.(md|mdx)$/, ""); // strip extension ONLY at end
+
+    return {
+      params: { category, slug: rest },
+      props: { entry },
+    };
+  });
+}
+
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+<BaseLayout title={`${entry.data.title} · Notes · indresh.dev`}>
+  <h1>{entry.data.title}</h1>
+  <p class="muted">
+    {entry.data.category} · {entry.data.level} · updated {entry.data.updated}
+  </p>
+
+  {entry.data.tags.length > 0 && (
+    <p class="muted"><strong>Tags:</strong> {entry.data.tags.join(", ")}</p>
+  )}
+
+  <article>
+    <Content />
+  </article>
+
+  {entry.data.revision.length > 0 && (
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin-top:0">Revision history</h2>
+      <ul>
+        {entry.data.revision.map((r) => (
+          <li><span class="muted">{r.date}:</span> {r.note}</li>
+        ))}
+      </ul>
+    </section>
+  )}
+</BaseLayout>

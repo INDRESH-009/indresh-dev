@@ -1,0 +1,165 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const lab = await getCollection("lab");
+const notes = await getCollection("notes");
+const projects = await getCollection("projects");
+
+// ---------- helpers ----------
+function stripExt(s: string) {
+  return s.replace(/\.(md|mdx)$/, "");
+}
+function labUrl(entryId: string) {
+  return `/lab/${stripExt(entryId)}`; // "2026/cycle-1.mdx" -> "/lab/2026/cycle-1"
+}
+function noteUrl(entry: any) {
+  // entry.id is like "ml/probabilistic-view.mdx"
+  const parts = entry.id.split("/");
+  const rest = stripExt(parts.slice(1).join("/"));
+  return `/notes/${entry.data.category}/${rest}`;
+}
+
+// ---------- pick "current cycle" (date-aware) ----------
+function parseYMD(s: string) {
+  // Interpret YYYY-MM-DD as a local date at midnight
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1, 0, 0, 0, 0);
+}
+
+const today = new Date();
+const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+
+// 1) Active by date: start <= today <= end
+const activeByDate = lab.find((c) => {
+  const start = parseYMD(c.data.start);
+  const end = parseYMD(c.data.end);
+  return start <= today0 && today0 <= end;
+}) ?? null;
+
+// 2) Fallback: most recent "ongoing" by start date
+const ongoingByStatus =
+  [...lab]
+    .filter((c) => c.data.status === "ongoing")
+    .sort((a, b) => (b.data.start ?? "").localeCompare(a.data.start ?? ""))[0] ?? null;
+
+// 3) Fallback: most recent by start date
+const latestByStart =
+  [...lab].sort((a, b) => (b.data.start ?? "").localeCompare(a.data.start ?? ""))[0] ?? null;
+
+const currentCycle = activeByDate ?? ongoingByStatus ?? latestByStart;
+
+
+// ---------- recent ----------
+const recentNotes = [...notes]
+  .sort((a, b) => (b.data.updated ?? "").localeCompare(a.data.updated ?? ""))
+  .slice(0, 5);
+
+const recentProjects = [...projects]
+  .sort((a, b) => (b.data.started ?? "").localeCompare(a.data.started ?? ""))
+  .slice(0, 4);
+---
+<BaseLayout title="indresh.dev">
+  <h1 style="margin-top:10px">indresh.dev</h1>
+  <p class="muted">
+    Lab = Time · Notes = Truth · Projects = Capability · Research = Identity
+  </p>
+
+  <div class="grid grid-2" style="margin-top:18px">
+    <section class="card">
+      <h2 style="margin-top:0">Current cycle</h2>
+
+      {currentCycle ? (
+        <>
+          <div class="muted">{currentCycle.data.start} → {currentCycle.data.end} · {currentCycle.data.status}</div>
+          <div style="font-weight:800; font-size:1.1rem; margin-top:6px">
+            <a href={labUrl(currentCycle.id)}>{currentCycle.data.title}</a>
+          </div>
+
+          {currentCycle.data.focus?.length > 0 && (
+            <div class="muted" style="margin-top:6px">{currentCycle.data.focus.join(", ")}</div>
+          )}
+
+          {currentCycle.data.summary && <p style="margin-top:10px">{currentCycle.data.summary}</p>}
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+            <a class="btn" href="/lab">All cycles</a>
+            <a class="btn" href="/notes">Notes</a>
+            <a class="btn" href="/projects">Projects</a>
+          </div>
+        </>
+      ) : (
+        <>
+          <p class="muted">No cycles yet. Create your first lab cycle in <code>src/content/lab/</code>.</p>
+          <a class="btn" href="/lab">Go to Lab</a>
+        </>
+      )}
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">How this site works</h2>
+      <ul style="margin:0; padding-left:18px">
+        <li><strong>Lab Notebook</strong>: cycle summaries, hypothesis → experiments → outcomes.</li>
+        <li><strong>Notes</strong>: living explanations (math-friendly), revised over time.</li>
+        <li><strong>Projects</strong>: reproducible builds with code + lessons.</li>
+        <li><strong>Research</strong>: the emerging program and publications.</li>
+      </ul>
+      <p class="muted" style="margin-top:10px">
+        One refined artifact per week beats daily noise.
+      </p>
+    </section>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:14px">
+    <section class="card">
+      <h2 style="margin-top:0">Recent notes</h2>
+      {recentNotes.length > 0 ? (
+        <ul style="margin:0; padding-left:18px">
+          {recentNotes.map((n) => (
+            <li>
+              <a href={noteUrl(n)}>{n.data.title}</a>
+              <span class="muted"> · {n.data.updated}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">No notes yet.</p>
+      )}
+      <div style="margin-top:10px">
+        <a class="btn" href="/notes">Browse notes</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Recent projects</h2>
+      {recentProjects.length > 0 ? (
+        <ul style="margin:0; padding-left:18px">
+          {recentProjects.map((p) => (
+            <li>
+              <a href={`/projects/${p.slug}`}>{p.data.title}</a>
+              <span class="muted"> · {p.data.status}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">No projects yet.</p>
+      )}
+      <div style="margin-top:10px">
+        <a class="btn" href="/projects">Browse projects</a>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    .btn{
+      display:inline-block;
+      padding:8px 12px;
+      border:1px solid rgba(0,0,0,.15);
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:600;
+      background: rgba(0,0,0,.03);
+    }
+    .btn:hover{ background: rgba(0,0,0,.06); }
+  </style>
+</BaseLayout>

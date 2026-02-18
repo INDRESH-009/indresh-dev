@@ -1,0 +1,298 @@
+---
+const pathname = Astro.props.pathname ?? "/";
+
+type Link = { href: string; label: string; match: (p: string) => boolean };
+
+const links: Link[] = [
+  { href: "/", label: "Home", match: (p) => p === "/" },
+  { href: "/research", label: "Research", match: (p) => p.startsWith("/research") },
+  { href: "/lab", label: "Lab Notebook", match: (p) => p.startsWith("/lab") },
+  { href: "/notes", label: "Notes", match: (p) => p.startsWith("/notes") },
+  { href: "/projects", label: "Projects", match: (p) => p.startsWith("/projects") },
+  { href: "/about", label: "About", match: (p) => p.startsWith("/about") },
+];
+---
+<nav class="nav" data-menu-open="false">
+  <div class="top">
+    <div class="brand">
+      <a href="/">indresh.dev</a>
+    </div>
+
+    <div class="right">
+      <!-- Desktop links -->
+      <div class="links desktop">
+        {links.map((l) => {
+          const active = l.match(pathname);
+          return (
+            <a href={l.href} class={active ? "active" : ""}>
+              {l.label}
+            </a>
+          );
+        })}
+      </div>
+
+      <!-- Mobile menu button -->
+      <button
+        id="menu-toggle"
+        class="menu"
+        type="button"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-drawer"
+      >
+        <span class="menu-icon" aria-hidden="true">☰</span>
+      </button>
+
+      <!-- Theme toggle -->
+      <button id="theme-toggle" class="toggle" type="button" aria-label="Toggle dark mode">
+        <span class="icon" aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Backdrop (only relevant on mobile) -->
+  <div id="drawer-backdrop" class="backdrop" aria-hidden="true"></div>
+
+  <!-- Off-canvas drawer -->
+  <aside id="mobile-drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="drawer-title muted">Menu</div>
+      <button id="drawer-close" class="close" type="button" aria-label="Close menu">✕</button>
+    </div>
+
+    <div class="drawer-links">
+      {links.map((l) => {
+        const active = l.match(pathname);
+        return (
+          <a href={l.href} class={active ? "active" : ""}>
+            {l.label}
+          </a>
+        );
+      })}
+    </div>
+  </aside>
+</nav>
+
+<script is:inline>
+  (function () {
+    // ------- Theme toggle -------
+    function getTheme() {
+      return document.documentElement.dataset.theme || "light";
+    }
+    function setTheme(t) {
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("theme", t); } catch (e) {}
+      const icon = document.querySelector("#theme-toggle .icon");
+      if (icon) icon.textContent = (t === "dark") ? "☀" : "☾";
+    }
+    setTheme(getTheme());
+    const themeBtn = document.getElementById("theme-toggle");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", function () {
+        const next = getTheme() === "dark" ? "light" : "dark";
+        setTheme(next);
+      });
+    }
+
+    // ------- Drawer menu -------
+    const nav = document.querySelector(".nav");
+    const btn = document.getElementById("menu-toggle");
+    const closeBtn = document.getElementById("drawer-close");
+    const drawer = document.getElementById("mobile-drawer");
+    const backdrop = document.getElementById("drawer-backdrop");
+
+    function setOpen(open) {
+      if (!nav || !btn || !drawer || !backdrop) return;
+      nav.dataset.menuOpen = open ? "true" : "false";
+
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+
+      drawer.setAttribute("aria-hidden", open ? "false" : "true");
+      backdrop.setAttribute("aria-hidden", open ? "false" : "true");
+
+      const icon = btn.querySelector(".menu-icon");
+      if (icon) icon.textContent = open ? "✕" : "☰";
+
+      // prevent background scroll when open
+      document.body.style.overflow = open ? "hidden" : "";
+    }
+
+    setOpen(false);
+
+    if (btn) {
+      btn.addEventListener("click", function () {
+        const open = nav && nav.dataset.menuOpen === "true";
+        setOpen(!open);
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        setOpen(false);
+      });
+    }
+
+    // Close on backdrop click
+    if (backdrop) {
+      backdrop.addEventListener("click", function () {
+        setOpen(false);
+      });
+    }
+
+    // Close when clicking a link
+    if (drawer) {
+      drawer.addEventListener("click", function (e) {
+        const t = e.target;
+        if (t && t.tagName === "A") setOpen(false);
+      });
+    }
+
+    // Close on Escape
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+
+    // Close if switching to desktop
+    window.addEventListener("resize", function () {
+      if (window.matchMedia("(min-width: 860px)").matches) setOpen(false);
+    });
+  })();
+</script>
+
+<style>
+  .nav{ padding:18px 0; position: relative; }
+
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  .brand a{
+    font-weight:700;
+    color: var(--accent) !important;
+    text-decoration:none;
+  }
+
+  .right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .links{ display:flex; gap:16px; flex-wrap:wrap; }
+  .links a{
+    color: var(--accent) !important;
+    text-decoration:none;
+    opacity:.95;
+  }
+  .links a:hover{
+    opacity:1;
+    text-decoration:underline;
+    text-underline-offset: 6px;
+  }
+  .links a.active{
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    font-weight: 700;
+    opacity: 1;
+  }
+
+  .toggle, .menu, .close{
+    border:1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    border-radius: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    line-height: 1;
+    font-weight: 700;
+  }
+  .toggle:hover, .menu:hover, .close:hover{ background: var(--code); }
+
+  .icon, .menu-icon{
+    display:inline-block;
+    width: 1.2em;
+    text-align:center;
+  }
+
+  /* --- Drawer defaults: hidden on desktop --- */
+  .backdrop, .drawer{ display:none; }
+
+  @media (max-width: 860px){
+    .links.desktop{ display:none; }
+    .menu{ display:inline-flex; align-items:center; justify-content:center; }
+
+    /* Backdrop */
+    .backdrop{
+      display:block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      z-index: 80;
+    }
+
+    /* Drawer */
+    .drawer{
+      display:block;
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100dvh;
+      width: min(320px, 86vw);
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      transform: translateX(100%);
+      transition: transform 220ms ease;
+      z-index: 90;
+      padding: 14px;
+      box-shadow: -20px 0 40px rgba(0,0,0,.35);
+    }
+
+    /* Open state */
+    .nav[data-menu-open="true"] .backdrop{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .nav[data-menu-open="true"] .drawer{
+      transform: translateX(0);
+    }
+
+    .drawer-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .drawer-title{ font-weight: 700; }
+
+    .drawer-links a{
+      display:block;
+      padding: 12px 10px;
+      border-radius: 12px;
+      color: var(--accent) !important;
+      text-decoration:none;
+      opacity:.95;
+    }
+
+    .drawer-links a:hover{
+      background: var(--code);
+      opacity: 1;
+      text-decoration:none;
+    }
+
+    .drawer-links a.active{
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 6px;
+      opacity: 1;
+    }
+  }
+</style>

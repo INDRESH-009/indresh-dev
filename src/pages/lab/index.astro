@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const lab = await getCollection("lab");
+
+// group by year from entry.id like "2026/cycle-1.mdx"
+const grouped = new Map<string, typeof lab>();
+for (const e of lab) {
+  const year = e.id.split("/")[0];
+  if (!grouped.has(year)) grouped.set(year, []);
+  grouped.get(year)!.push(e);
+}
+
+const years = Array.from(grouped.keys()).sort((a, b) => b.localeCompare(a));
+
+for (const y of years) {
+  grouped.get(y)!.sort((a, b) => (a.data.start ?? "").localeCompare(b.data.start ?? ""));
+}
+
+function labUrl(entryId: string) {
+  // "2026/cycle-1.mdx" -> "/lab/2026/cycle-1"
+  const clean = entryId.replace(/\.(md|mdx)$/, "");
+  return `/lab/${clean}`;
+}
+---
+<BaseLayout title="Lab Notebook · indresh.dev">
+  <h1>Lab Notebook</h1>
+  <p class="muted">Time-layer: cycles grouped by year. Each cycle links out to Notes and Projects.</p>
+
+  {years.map((y) => (
+    <section style="margin-top:22px">
+      <h2>{y}</h2>
+      <div class="grid">
+        {grouped.get(y)!.map((c) => (
+          <div class="card">
+            <div class="muted">{c.data.start} → {c.data.end} · {c.data.status}</div>
+            <div style="font-weight:700">
+              <a href={labUrl(c.id)}>{c.data.title}</a>
+            </div>
+            {c.data.focus.length > 0 && <div class="muted">{c.data.focus.join(", ")}</div>}
+            {c.data.summary && <p>{c.data.summary}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}
+</BaseLayout>

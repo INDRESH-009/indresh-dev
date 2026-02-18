@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// Required for static routes
+export async function getStaticPaths() {
+  const notes = await getCollection("notes");
+  const categories = Array.from(new Set(notes.map((n) => n.data.category)));
+  return categories.map((category) => ({ params: { category } }));
+}
+
+const { category } = Astro.params;
+if (!category) throw new Error("Missing category");
+
+const notes = (await getCollection("notes"))
+  .filter((n) => n.data.category === category)
+  .sort((a, b) => (b.data.updated ?? "").localeCompare(a.data.updated ?? ""));
+---
+<BaseLayout title={`${category} · Notes · indresh.dev`}>
+  <h1>Notes: {category}</h1>
+
+  <div class="grid">
+    {notes.map((n) => {
+      const rest = n.id
+            .split("/")
+            .slice(1)
+            .join("/")
+            .replace(/\.(md|mdx)$/, "");
+
+      return (
+        <div class="card">
+          <div class="muted">{n.data.updated} · {n.data.level}</div>
+          <div style="font-weight:700">
+            <a href={`/notes/${n.data.category}/${rest}`}>{n.data.title}</a>
+          </div>
+          {n.data.tags.length > 0 && <div class="muted">{n.data.tags.join(", ")}</div>}
+        </div>
+      );
+    })}
+  </div>
+</BaseLayout>

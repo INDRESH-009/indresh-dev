@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const lab = await getCollection("lab");
+
+  return lab.map((entry) => ({
+    // id param must match the route: /lab/<id>
+    // entry.id might be "2026/cycle-1.mdx" → strip extension
+    params: { id: entry.id.replace(/\.(md|mdx)$/, "") },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const a = entry.data.artifacts;
+
+function prettyLink(url: string) {
+  return url;
+}
+---
+<BaseLayout title={`${entry.data.title} · Lab · indresh.dev`}>
+  <h1>{entry.data.title}</h1>
+  <p class="muted">{entry.data.start} → {entry.data.end} · {entry.data.status}</p>
+  {entry.data.summary && <p>{entry.data.summary}</p>}
+
+  {(a?.notes?.length > 0 || a?.projects?.length > 0) && (
+    <section class="card">
+      <h2 style="margin-top:0">Artifacts</h2>
+
+      {a.notes.length > 0 && (
+        <>
+          <h3>Notes</h3>
+          <ul>
+            {a.notes.map((u) => (
+              <li><a href={u}>{prettyLink(u)}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {a.projects.length > 0 && (
+        <>
+          <h3>Projects</h3>
+          <ul>
+            {a.projects.map((u) => (
+              <li><a href={u}>{prettyLink(u)}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  )}
+
+  <article class="card" style="margin-top:14px">
+    <Content />
+  </article>
+</BaseLayout>

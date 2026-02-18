@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const notes = await getCollection("notes");
+
+// Recent notes by updated date
+const recent = [...notes]
+  .sort((a, b) => (b.data.updated ?? "").localeCompare(a.data.updated ?? ""))
+  .slice(0, 10);
+
+// Categories from schema
+const categories = Array.from(new Set(notes.map((n) => n.data.category))).sort();
+---
+<BaseLayout title="Notes · indresh.dev">
+  <h1>Notes</h1>
+  <p class="muted">Truth-layer: living conceptual notes with KaTeX math.</p>
+
+  <div class="grid grid-2">
+    <section class="card">
+      <h2 style="margin-top:0">Categories</h2>
+      <ul>
+        {categories.map((c) => (
+          <li><a href={`/notes/${c}`}>{c}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Recent</h2>
+      <ul>
+        {recent.map((n) => {
+          const rest = n.id
+            .split("/")
+            .slice(1)
+            .join("/")
+            .replace(/\.(md|mdx)$/, "");
+
+          return (
+            <li>
+              <a href={`/notes/${n.data.category}/${rest}`}>{n.data.title}</a>
+              <span class="muted"> · {n.data.updated}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>

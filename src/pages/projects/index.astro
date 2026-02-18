@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const projects = await getCollection("projects");
+projects.sort((a: typeof projects[number], b: typeof projects[number]) => (b.data.started ?? "").localeCompare(a.data.started ?? ""));
+---
+<BaseLayout title="Projects · indresh.dev">
+  <h1>Projects</h1>
+  <p class="muted">Capability-layer: reproducible engineering artifacts.</p>
+
+  <div class="grid">
+    {projects.map((p: typeof projects[number]) => (
+      <div class="card">
+        <div class="muted">{p.data.started} · {p.data.status}</div>
+        <div style="font-weight:700">
+          <a href={`/projects/${p.slug}`}>{p.data.title}</a>
+        </div>
+        <div class="muted">{p.data.tags.join(", ")}</div>
+      </div>
+    ))}
+  </div>
+</BaseLayout>

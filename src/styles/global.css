@@ -1,25 +1,39 @@
 :root{
   --max: 980px;
-  --bg: #fafafa;
-  --fg: #111111;
-  --muted: rgba(17, 17, 17, .65);
-  --border: rgba(17, 17, 17, .12);
-  --card: #ffffff;
-  --code: rgba(17, 17, 17, .05);
 
-  --accent: #2f6feb;
-  --accent-2: #7cc7ff;
+  /* Light theme: refined paper aesthetic */
+  --bg: #e9e5dc;              /* slightly deeper ivory */
+  --card: #f6f2e9;            /* clear but soft lift */
+
+  --fg: #121212;
+  --muted: rgba(18, 18, 18, .66);
+
+  /* Less visible border, rely more on depth */
+  --border: rgba(18, 18, 18, .06);
+  --shadow: rgba(18, 18, 18, .08);
+
+  --code: rgba(18, 18, 18, .05);
+
+  /* Slightly muted orange for sophistication */
+  --accent: #f97316;          /* toned down */
+  --accent-hover: #ea580c;
 }
 
 html[data-theme="dark"]{
-  --bg: #0b0f14;
-  --fg: #e8eef5;
-  --muted: rgba(232, 238, 245, .75);
-  --border: rgba(232, 238, 245, .16);
-  --card: rgba(232, 238, 245, .06);
-  --code: rgba(232, 238, 245, .10);
+  --bg: #0c1015;              /* tiny lift from pure black */
+  --fg: #e6edf3;
+  --muted: rgba(230, 237, 243, .75);
 
-  --accent: var(--accent-2);
+  /* Increase card separation slightly */
+  --card: rgba(255, 255, 255, .07);
+
+  --border: rgba(255, 255, 255, .08);
+  --shadow: rgba(0, 0, 0, .5);
+
+  --code: rgba(255, 255, 255, .10);
+
+  --accent: #fb923c;          /* orange tuned for dark */
+  --accent-hover: #fdba74;
 }
 
 body{
@@ -40,10 +54,13 @@ h1,h2,h3{ line-height:1.2; }
 .muted{ color: var(--muted); }
 
 .card{
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
   background: var(--card);
+
+  /* Slightly stronger depth cue */
+  box-shadow: 0 2px 6px var(--shadow);
 }
 
 .grid{ display:grid; gap:14px; }
@@ -64,15 +81,11 @@ pre{
   overflow:auto;
 }
 
-/* ✅ GLOBAL LINK RESET — kills visited purple everywhere */
 a:any-link{
   color: var(--accent) !important;
   text-decoration: none;
 }
 a:hover{
+  color: var(--accent-hover) !important;
   text-decoration: underline;
-  opacity: 0.9;
-}
-a:active{
-  opacity: 0.8;
 }

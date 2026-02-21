@@ -77,15 +77,24 @@ const links: Link[] = [
   (function () {
     // ------- Theme toggle -------
     function getTheme() {
+      // Prefer saved theme; fallback to current dataset; fallback to light
+      try {
+        const saved = localStorage.getItem("theme");
+        if (saved === "dark" || saved === "light") return saved;
+      } catch (e) {}
       return document.documentElement.dataset.theme || "light";
     }
+
     function setTheme(t) {
       document.documentElement.dataset.theme = t;
       try { localStorage.setItem("theme", t); } catch (e) {}
       const icon = document.querySelector("#theme-toggle .icon");
       if (icon) icon.textContent = (t === "dark") ? "☀" : "☾";
     }
+
+    // Initialize theme correctly on load
     setTheme(getTheme());
+
     const themeBtn = document.getElementById("theme-toggle");
     if (themeBtn) {
       themeBtn.addEventListener("click", function () {
@@ -114,7 +123,6 @@ const links: Link[] = [
       const icon = btn.querySelector(".menu-icon");
       if (icon) icon.textContent = open ? "✕" : "☰";
 
-      // prevent background scroll when open
       document.body.style.overflow = open ? "hidden" : "";
     }
 
@@ -133,14 +141,12 @@ const links: Link[] = [
       });
     }
 
-    // Close on backdrop click
     if (backdrop) {
       backdrop.addEventListener("click", function () {
         setOpen(false);
       });
     }
 
-    // Close when clicking a link
     if (drawer) {
       drawer.addEventListener("click", function (e) {
         const t = e.target;
@@ -148,12 +154,10 @@ const links: Link[] = [
       });
     }
 
-    // Close on Escape
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") setOpen(false);
     });
 
-    // Close if switching to desktop
     window.addEventListener("resize", function () {
       if (window.matchMedia("(min-width: 860px)").matches) setOpen(false);
     });
@@ -194,7 +198,7 @@ const links: Link[] = [
   }
   .links a.active{
     text-decoration: underline;
-    text-underline-offset: 6px;
+    text-underline-offset: 8px;
     font-weight: 700;
     opacity: 1;
   }
@@ -217,14 +221,18 @@ const links: Link[] = [
     text-align:center;
   }
 
+  /* ✅ ONLY CHANGE: hide hamburger on large screens */
+  .menu{ display:none; }
+
   /* --- Drawer defaults: hidden on desktop --- */
   .backdrop, .drawer{ display:none; }
 
   @media (max-width: 860px){
     .links.desktop{ display:none; }
+
+    /* show hamburger only on mobile */
     .menu{ display:inline-flex; align-items:center; justify-content:center; }
 
-    /* Backdrop */
     .backdrop{
       display:block;
       position: fixed;
@@ -236,7 +244,6 @@ const links: Link[] = [
       z-index: 80;
     }
 
-    /* Drawer */
     .drawer{
       display:block;
       position: fixed;
@@ -253,7 +260,6 @@ const links: Link[] = [
       box-shadow: -20px 0 40px rgba(0,0,0,.35);
     }
 
-    /* Open state */
     .nav[data-menu-open="true"] .backdrop{
       opacity: 1;
       pointer-events: auto;

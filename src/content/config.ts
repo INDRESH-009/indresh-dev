@@ -20,7 +20,7 @@ const notes = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-    category: z.enum(["math", "ml", "optimization", "systems"]),
+    category: z.enum(["Mathematics", "Machine Learning", "Computing","Image and Signal Processing","Programming"]),
     tags: z.array(z.string()).default([]),
     level: z.enum(["foundation", "intermediate", "advanced"]).default("foundation"),
     updated: z.string(), // YYYY-MM-DD

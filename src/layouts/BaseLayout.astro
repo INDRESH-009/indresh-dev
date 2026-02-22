@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
-
+import Analytics from '@vercel/analytics/astro'
 const fm = Astro.props.frontmatter ?? {};
 const title = Astro.props.title ?? fm.title ?? "indresh.dev";
 
@@ -39,5 +39,6 @@ const pathname = Astro.url.pathname;
       <Nav pathname={pathname} />
       <slot />
     </main>
+    <Analytics />
   </body>
 </html>

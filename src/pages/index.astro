@@ -31,11 +31,12 @@ const today = new Date();
 const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
 
 // 1) Active by date: start <= today <= end
-const activeByDate = lab.find((c) => {
-  const start = parseYMD(c.data.start);
-  const end = parseYMD(c.data.end);
-  return start <= today0 && today0 <= end;
-}) ?? null;
+const activeByDate =
+  lab.find((c) => {
+    const start = parseYMD(c.data.start);
+    const end = parseYMD(c.data.end);
+    return start <= today0 && today0 <= end;
+  }) ?? null;
 
 // 2) Fallback: most recent "ongoing" by start date
 const ongoingByStatus =
@@ -49,7 +50,6 @@ const latestByStart =
 
 const currentCycle = activeByDate ?? ongoingByStatus ?? latestByStart;
 
-
 // ---------- recent ----------
 const recentNotes = [...notes]
   .sort((a, b) => (b.data.updated ?? "").localeCompare(a.data.updated ?? ""))
@@ -58,12 +58,76 @@ const recentNotes = [...notes]
 const recentProjects = [...projects]
   .sort((a, b) => (b.data.started ?? "").localeCompare(a.data.started ?? ""))
   .slice(0, 4);
+
+// ---------- homepage copy ----------
+const intro = {
+  title: "Hi, I’m Indresh.",
+  p1: "Curiosity — to learn, to understand, to experiment, and to explain — drives my work.",
+  p2: "I build and study machine learning models, particularly in computer vision and medical imaging. Much of my recent work has involved research and publications in these areas. At the same time, I’m drawn to problems that don’t fit neatly within a single field — often moving between mathematics, physics, biology, and real-world data.",
+  p3: "Lately, I’ve been strengthening my mathematical foundations — especially probabilistic reasoning and understanding how representations are learned.",
+  p4: "For a long time, I wanted a space where this exploration could be intentional rather than scattered — not isolated notes or repositories, but a coherent, evolving lab.",
+  p5: "That’s why I built indresh.dev.",
+  p6: "This is my working lab.",
+  p7: "I operate in cycles — asking better questions, forming hypotheses, testing ideas, writing notes, and building projects that document my scientific explorations.",
+};
+
+const resumeHref = "/resume.pdf"; // put PDF in /public/resume.pdf
+const portraitHref = "/profile.jpeg"; // put image in /public/profile-vertical.jpg
 ---
 <BaseLayout title="indresh.dev">
   <h1 style="margin-top:10px">indresh.dev</h1>
   <p class="muted">
     Lab = Time · Notes = Truth · Projects = Capability · Research = Identity
   </p>
+
+  <!-- HERO: Copy (left) + Portrait (right) -->
+  <section class="card hero" style="margin-top:18px">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h2 style="margin-top:0">{intro.title}</h2>
+
+        <p style="margin-top:10px">{intro.p1}</p>
+        <p style="margin-top:10px">{intro.p2}</p>
+        <p style="margin-top:10px">{intro.p3}</p>
+        <p style="margin-top:10px">{intro.p4}</p>
+        <p style="margin-top:10px">{intro.p5}</p>
+        <p style="margin-top:10px">{intro.p6}</p>
+        <p style="margin-top:10px">{intro.p7}</p>
+
+        <div class="cta-row" style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+          <a class="btn btn-primary" href={resumeHref} download>Download resume (PDF)</a>
+          <a class="btn" href="/about">About / philosophy</a>
+          <a class="btn" href={currentCycle ? labUrl(currentCycle.id) : "/lab"}>Follow current cycle</a>
+        </div>
+      </div>
+
+      <div class="hero-photo">
+        <img src={portraitHref} alt="Portrait of Indresh" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience snapshot: separate card -->
+  <section class="card" style="margin-top:14px">
+    <h2 style="margin-top:0">Experience snapshot</h2>
+
+    <div class="grid grid-3 proof-grid">
+      <div class="proof-card">
+        <div class="proof-title">ML Research Intern — Beatly Digital</div>
+        <div class="muted">Continuous non-invasive BP (ECG/PPG) · Clinical datasets · Deployment-ready models</div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-title">Research Assistant — Jadavpur University</div>
+        <div class="muted">Skin lesion segmentation · Cross-dataset generalization · Edge-efficient architectures</div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-title">Research Assistant — SRM × SIMS Hospital</div>
+        <div class="muted">Coronary angiography segmentation · Anatomical vessel labeling · Clinical decision support</div>
+      </div>
+    </div>
+  </section>
 
   <div class="grid grid-2" style="margin-top:18px">
     <section class="card">
@@ -161,5 +225,62 @@ const recentProjects = [...projects]
       background: rgba(0,0,0,.03);
     }
     .btn:hover{ background: rgba(0,0,0,.06); }
+
+    .btn-primary{
+      border-color: rgba(0,0,0,.25);
+      background: rgba(0,0,0,.06);
+    }
+    .btn-primary:hover{
+      background: rgba(0,0,0,.10);
+    }
+
+    /* HERO layout */
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.6fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .hero-copy p{ max-width: 74ch; line-height: 1.65; margin: 10px 0; }
+
+    .hero-photo{
+      display:flex;
+      justify-content: flex-end;
+    }
+    .hero-photo img{
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 3/5.5;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(0,0,0,.02);
+    }
+
+    /* Experience cards */
+    .proof-grid{ gap: 12px; }
+    .proof-card{
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(0,0,0,.02);
+    }
+    .proof-title{
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    /* If your .grid system doesn't include grid-3, this ensures it works */
+    .grid-3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 900px){
+      .hero-grid{ grid-template-columns: 1fr; }
+      .hero-photo{ justify-content: flex-start; }
+      .hero-photo img{ max-width: 360px; }
+      .grid-3{ grid-template-columns: 1fr; }
+    }
   </style>
 </BaseLayout>

@@ -73,7 +73,18 @@ const intro = {
 
 const resumeHref = "/resume.pdf"; // put PDF in /public/resume.pdf
 const portraitHref = "/profile.jpeg"; // put image in /public/profile-vertical.jpg
+
+// ---------- socials (EDIT THESE) ----------
+const socials = {
+  linkedin: "https://www.linkedin.com/in/indreshmr/",
+  email: "mailto:indresh15.dev@gmail.com",
+  x: "https://x.com/explode73",
+  scholar: "https://scholar.google.com/citations?user=YOUR_ID",
+  github:"https://github.com/INDRESH-009"
+
+};
 ---
+
 <BaseLayout title="indresh.dev">
   <h1 style="margin-top:10px">indresh.dev</h1>
   <p class="muted">
@@ -97,13 +108,43 @@ const portraitHref = "/profile.jpeg"; // put image in /public/profile-vertical.j
 
         <div class="cta-row" style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
           <a class="btn btn-primary" href={resumeHref} download>Download resume (PDF)</a>
-          <a class="btn" href="/about">About / philosophy</a>
           <a class="btn" href={currentCycle ? labUrl(currentCycle.id) : "/lab"}>Follow current cycle</a>
         </div>
       </div>
 
       <div class="hero-photo">
         <img src={portraitHref} alt="Portrait of Indresh" loading="lazy" />
+
+        <!-- Socials: under photo -->
+        <div class="social-row" aria-label="Social links">
+          <a class="social-icon" href={socials.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5ZM.5 23.5h4V7.5h-4v16ZM8.5 7.5h3.8v2.2h.1c.5-1 1.8-2.2 3.8-2.2 4 0 4.8 2.6 4.8 6v9.9h-4v-8.8c0-2.1 0-4.8-2.9-4.8s-3.4 2.3-3.4 4.7v8.9h-4v-16Z"/>
+            </svg>
+          </a>
+
+          <a class="social-icon" href={socials.email} aria-label="Email">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5L4 8V6l8 5 8-5v2Z"/>
+            </svg>
+          </a>
+          <a class="social-icon" href={socials.github} aria-label="GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.66.5 12.02c0 5.1 3.29 9.43 7.86 10.96.57.1.78-.25.78-.56 0-.27-.01-1.15-.02-2.09-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.56-.29-5.26-1.28-5.26-5.72 0-1.26.45-2.3 1.18-3.11-.12-.29-.51-1.47.11-3.07 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.18-1.49 3.14-1.18 3.14-1.18.62 1.6.23 2.78.11 3.07.73.81 1.18 1.85 1.18 3.11 0 4.45-2.7 5.42-5.27 5.7.41.36.77 1.07.77 2.16 0 1.56-.01 2.82-.01 3.21 0 .31.21.67.79.56A11.52 11.52 0 0 0 23.5 12C23.5 5.66 18.35.5 12 .5Z"/>
+          </svg>
+        </a>
+          <a class="social-icon" href={socials.scholar} target="_blank" rel="noreferrer" aria-label="Google Scholar">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2 1 7l11 5 9-4.09V17h2V7L12 2Zm0 12L3 9v6c0 3.87 3.58 7 9 7s9-3.13 9-7V9l-9 5Z"/>
+            </svg>
+          </a>
+          
+          <a class="social-icon" href={socials.x} target="_blank" rel="noreferrer" aria-label="X">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.7l-5.2-6.6L5.6 22H2.5l7.3-8.4L1 2h6.9l4.7 6.1L18.9 2Zm-1.2 18h1.7L6.2 3.9H4.4L17.7 20Z"/>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -246,16 +287,47 @@ const portraitHref = "/profile.jpeg"; // put image in /public/profile-vertical.j
 
     .hero-photo{
       display:flex;
-      justify-content: flex-end;
+      flex-direction: column;
+      align-items: flex-end;
+      width: 100%;
     }
     .hero-photo img{
       width: 100%;
       max-width: 320px;
-      aspect-ratio: 3/5.5;
+      aspect-ratio: 3/5;
       object-fit: cover;
       border-radius: 18px;
       border: 1px solid rgba(0,0,0,.10);
       background: rgba(0,0,0,.02);
+    }
+
+    /* Social icons under portrait */
+    .social-row{
+    display:flex;
+    gap: 18px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+  }
+    .social-icon{
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(0,0,0,.02);
+      text-decoration: none;
+    }
+    .social-icon svg{
+      width: 18px;
+      height: 18px;
+      fill: var(--accent, #ff8a00);
+    }
+    .social-icon:hover{
+      background: rgba(0,0,0,.06);
     }
 
     /* Experience cards */
@@ -279,8 +351,9 @@ const portraitHref = "/profile.jpeg"; // put image in /public/profile-vertical.j
 
     @media (max-width: 900px){
       .hero-grid{ grid-template-columns: 1fr; }
-      .hero-photo{ justify-content: flex-start; }
+      .hero-photo{ align-items: flex-start; }
       .hero-photo img{ max-width: 360px; }
+      .social-row{ justify-content: flex-start; }
       .grid-3{ grid-template-columns: 1fr; }
     }
   </style>
